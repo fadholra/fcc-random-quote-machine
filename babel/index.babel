@@ -1,0 +1,73 @@
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      quotesData: {},
+      quotesText: "",
+      quotesAuthor: ""
+    };
+    this.downloadQuotes = this.downloadQuotes.bind(this);
+    this.getQuotes = this.getQuotes.bind(this);
+  }
+  
+  downloadQuotes() {
+    $.getJSON(
+  'https://gist.githubusercontent.com/camperbot/5a022b72e96c4c9585c32bf6a75f62d9/raw/e3c6895ce42069f0ee7e991229064f167fe8ccdc/quotes.json', 
+    (data) => {
+      this.setState({
+        quotesData: data
+      });
+      //console.log(this.state.quotesData, "QuotesData");
+    }).then(() => this.getQuotes());
+  }
+  
+  getQuotes() {
+    let newQuotes = Math.floor(Math.random() * this.state.quotesData.quotes.length);
+    //console.log(this.state.quotesData.quotes.length, "length");
+    console.log(newQuotes, "newQuotes");
+    console.log(this.state.quotesData, "QuotesData");
+    this.setState({
+      quotesText: this.state.quotesData.quotes[newQuotes].quote,
+      quotesAuthor: this.state.quotesData.quotes[newQuotes].author,
+    });
+    //console.log(this.state.quotesAuthor);
+  }
+  
+  componentDidMount() {
+    this.downloadQuotes();
+  }
+  
+  render() {
+    let tweetURL = 'https://twitter.com/intent/tweet?'
+      + 'hashtags=quotes&related=freecodecamp&text='
+      + encodeURIComponent('"' + this.state.quotesText + '" -' + this.state.quotesAuthor);
+    return (
+      <div id="quote-box">
+        <div id="text">
+          <i className="fa fa-quote-left" style={{color: "#16a085"}}> </i>
+          <span className="text-text">{ this.state.quotesText }</span>
+        </div>
+        <div id="author">
+          <span>- { this.state.quotesAuthor }</span>
+        </div>
+        <Button newQuotes={ this.getQuotes } tweet={tweetURL}/>
+      </div>
+    );
+  }
+}
+
+class Button extends React.Component {
+  render () {
+    const x = this.props.newQuotes;
+    const y = this.props.tweet;
+    return (
+      <div className="buttons">
+        <a href={ y } target="_blank" className="button" id="tweet-quote"  title="tweet!"><i className="fa fa-twitter"></i></a>
+        <button className="button" id="new-quote" title="new Quotes" onClick={ x }>New Quotes</button>
+      </div>
+    )
+  }
+}
+ 
+ReactDOM.render(<App />, document.getElementById("app"));
+
